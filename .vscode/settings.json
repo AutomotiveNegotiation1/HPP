@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "complex": "cpp",
+        "jacobi_cplx_config.h": "c"
+    }
+}
