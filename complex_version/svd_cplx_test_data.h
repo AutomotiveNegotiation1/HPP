@@ -1,8 +1,7 @@
 #pragma once 
 
-#include <complex>
-typedef std::complex<double> Complex;
-Complex A[5*5] ={
+#include "jacobi_type.h"
+Complex cA[5*5] ={
     {285.22163, 48.69791},
     {172.23589, 57.53012},
     {54.37214, -1.54916},

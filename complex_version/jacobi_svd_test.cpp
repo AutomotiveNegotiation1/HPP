@@ -1,12 +1,8 @@
 #include "jacobi_svd.h"
-#include "svd_cplx_test_data.h"
+#include "svd_test_data.h"
 #include <stdbool.h>
-
-//#define m 10
-//#define n 20
-
-constexpr int m = 10;
-constexpr int n = 20;
+#include "jacobi_config.h"
+#include "svd_cplx_test_data.h"
 
 static double usv_t[m*n]; 
 static double v_t[n*n];

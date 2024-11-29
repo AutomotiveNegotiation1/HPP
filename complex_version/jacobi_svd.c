@@ -1,25 +1,23 @@
 //#include "mat_utils.h"
 //#include "jacobi_evd.h"
 #include "jacobi_svd.h"
+#include "jacobi_config.h"
 
-#define M 10
-#define N 20
-
-double A_t[N*M];
-double AA_t[M*M]; 
-double A_tA[N*N]; 
-double s_m[M*M];
-double s_n[N*N] ; 
-double u_t[M*M] ;
-double v_t[N*N] ;
-double us[M*N];
-double newU[M*M];
-double tmp[M*N]; 
-double uSv_t[M*N]; 
-double vs_t[N*M] ; 
-double newV[N*N] ; 
-double newV_t[N*N] ;
-double s_t[N*M] ; 
+double A_t[N_*M_];
+double AA_t[M_*M_]; 
+double A_tA[N_*N_]; 
+double s_m[M_*M_];
+double s_n[N_*N_] ; 
+double u_t[M_*M_] ;
+double v_t[N_*N_] ;
+double us[M_*N_];
+double newU[M_*M_];
+double tmp[M_*N_]; 
+double uSv_t[M_*N_]; 
+double vs_t[N_*M_] ; 
+double newV[N_*N_] ; 
+double newV_t[N_*N_] ;
+double s_t[N_*M_] ; 
 //double tmp[m*n]; 
 //double uSv_t[m*n]; 
         
