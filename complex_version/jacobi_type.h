@@ -1,6 +1,8 @@
 #pragma once 
 
 #include <complex>
-typedef std::complex<double> Complex;
+
+typedef double T;
+typedef std::complex<T> Complex;
 using namespace std;
 

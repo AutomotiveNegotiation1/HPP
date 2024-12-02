@@ -3,28 +3,9 @@
 #include "jacobi_config.h"
 #include "jacobi_cplx_svd.h"
 
-Complex A_H[N_*M_];
-Complex AA_H[M_*M_]; 
-Complex A_HA[N_*N_];
-
-Complex s_m[M_*M_];
-Complex s_n[N_*N_] ; 
-
-Complex u_H[M_*M_] ;
-Complex v_H[N_*N_] ;
-
-Complex us[M_*N_];
-Complex newU[M_*M_];
-Complex tmp[M_*N_]; 
-Complex uSv_H[M_*N_]; 
-Complex vs_H[N_*M_] ; 
-
-Complex newV[N_*N_] ; 
-Complex newV_H[N_*N_] ;
-Complex s_H[N_*M_] ; 
         
 
-void jacobi_svd(Complex* A, Complex* u, Complex* v, Complex* s, int m, int n){
+void jacobi_svd(Complex* A, Complex* u, Complex* v, Complex* s){
 
     // A : m by n 
     // u: m by m 
@@ -32,6 +13,27 @@ void jacobi_svd(Complex* A, Complex* u, Complex* v, Complex* s, int m, int n){
     // s: m by n 
 
     // jacobi_svd returns u, v, s such as A = (u)(s)(v^t)
+
+
+    Complex A_H[n*m];
+    Complex AA_H[m*m]; 
+    Complex A_HA[n*n];
+
+    Complex s_m[m*m];
+    Complex s_n[n*n] ; 
+
+    Complex u_H[m*m] ;
+    Complex v_H[n*n] ;
+
+    Complex us[m*n];
+    Complex newU[m*m];
+    Complex tmp[m*n]; 
+    Complex uSv_H[m*n]; 
+    Complex vs_H[n*m] ; 
+
+    Complex newV[n*n] ; 
+    Complex newV_H[n*n] ;
+    Complex s_H[n*m] ; 
     
     /* ----- STEP 0 -----*/
     

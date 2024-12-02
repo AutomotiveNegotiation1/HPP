@@ -1,10 +1,10 @@
 #include "mat_utils_cplx.h"
 
 
-void print_mxn_matrix(Complex* A, int m, int n){
+void print_mxn_matrix(Complex* A, int rowA, int colA){
 
-    for(int i=0; i<m; i++){
-        for(int j=0; j<n; j++){
+    for(int i=0; i<rowA; i++){
+        for(int j=0; j<colA; j++){
             //printf("%f ",A[i*n+j]); 
             std::cout << A[i*n+j] << " "; 
         }
@@ -39,42 +39,46 @@ void matmul_mxn(Complex* A, Complex* B, Complex*C, int rowA, int colA, int rowB,
     }
 } 
 
-void transpose_mxn(Complex* A, Complex* A_t, int m, int n){
+void transpose_mxn(Complex* A, Complex* A_t, int rowA, int colA){
     // A: m x n matrix 
     // A_t : n x m matrix 
 
-    for(int i=0; i<m; i++){
-        for(int j=0; j<n; j++){
-            A_t[j*m+i] = A[i*n+j]; 
+    for(int i=0; i<rowA; i++){
+        for(int j=0; j<colA; j++){
+            A_t[j*rowA+i] = A[i*colA+j]; 
         }
     }
 }
 
-void hermitian_mxn(Complex*A, Complex* A_H, int m, int n){
+void hermitian_mxn(Complex*A, Complex* A_H, int rowA, int colA){
     // Conjugate Transpose 
-    for(int i=0; i<m; i++){
-        for(int j=0; j<n; j++){
-            A_H[j*m+i] = conj(A[i*n+j]);
+    for(int i=0; i<rowA; i++){
+        for(int j=0; j<colA; j++){
+            A_H[j*rowA+i] = conj(A[i*colA+j]);
         }
     }    
 }
 
-void make_scale_mxn(Complex* s_m, Complex* s_n, Complex* s_mxn, int m, int n){
+void make_scale_mxn(Complex* s_m, Complex* s_n, Complex* s_mxn, int rowS, int colS){
     
     //int s = -1; 
-    if (m>n){
+    
+    // m->rowS 
+    // n->colS 
+
+    if (rowS>colS){
         //s = n;
 
-        for(int i=0; i<m; i++){
-            for(int j=0; j<n; j++){
+        for(int i=0; i<rowS; i++){
+            for(int j=0; j<colS; j++){
                 if(i==j){
                     
                     //s_mxn[i*n +j] = sqrt(fabs(s_n[i*n+j])); 
-                    s_mxn[i*n +j] = Complex(sqrt(complex_norm(s_n[i*n+j])), 0); 
+                    s_mxn[i*colS +j] = Complex(sqrt(complex_norm(s_n[i*colS+j])), 0); 
                 }
                 else{
                     //s_mxn[i*n + j] = 0; 
-                    s_mxn[i*n +j] = Complex(0,0);
+                    s_mxn[i*colS +j] = Complex(0,0);
                 }
             }
         } 
@@ -82,14 +86,14 @@ void make_scale_mxn(Complex* s_m, Complex* s_n, Complex* s_mxn, int m, int n){
     else{ // m<=n
         //s = m; 
 
-        for(int i=0; i<m; i++){
-            for(int j=0; j<n; j++){
+        for(int i=0; i<rowS; i++){
+            for(int j=0; j<colS; j++){
                 if(i==j){
-                    s_mxn[i*n+j] = Complex(sqrt(complex_norm(s_m[i*m+j])), 0); 
+                    s_mxn[i*colS+j] = Complex(sqrt(complex_norm(s_m[i*rowS+j])), 0); 
                     //s_mxn[i*n+j] = sqrt(fabs(s_m[i*m+j])); 
                 }
                 else{
-                    s_mxn[i*n+j]= Complex(0,0); 
+                    s_mxn[i*colS+j]= Complex(0,0); 
                 }
             }
         }
@@ -109,62 +113,69 @@ void swap_vectors(int mth, int nth, Complex* EV, int N){
     }
 }
 
-void eigen_sort(Complex* EigenVectors, Complex* s, int m){
+void eigen_sort(Complex* EigenVectors, Complex* s, int N){
     
     // bubble sort (descending order)
 
-    for(int i=0; i<m-1; i++){
+    // m -> N 
+    for(int i=0; i<N-1; i++){
 
-        for(int j=0; j<m-i-1; j++){
+        for(int j=0; j<N-i-1; j++){
 
-            Complex sjj = s[j*m + j]; // Sjj
-            Complex sjj_next = s[(j+1)*m + j+1]; //Sj+1, j+1
+            Complex sjj = s[j*N + j]; // Sjj
+            Complex sjj_next = s[(j+1)*N + j+1]; //Sj+1, j+1
 
             if(complex_norm(sjj) < complex_norm(sjj_next)){
                 
-                s[(j+1)*m + (j+1)] = sjj;  
-                s[j*m + j] = sjj_next;
+                s[(j+1)*N + (j+1)] = sjj;  
+                s[j*N + j] = sjj_next;
 
-                swap_vectors(j, j+1, EigenVectors, m);  
+                swap_vectors(j, j+1, EigenVectors, N);  
             }
         }
     }
 
 }
 
-void get_u_from_us(Complex* us, Complex* s_mxn, Complex* newU, int m, int n){
+void get_u_from_us(Complex* us, Complex* s_mxn, Complex* newU, int rowS, int colS){
 
     //us : mxn  (us==Av)  
     // s_mxn : mxn 
     // newU : mxm
 
-    if(m<=n){
-        for(int j=0; j<m; j++){ // jth column 
-            for(int i=0; i<m; i++){ // ith row 
-                if (complex_norm(s_mxn[j*n+j])< 10e-7){
-                    s_mxn[j*n+j] = 10e-8; 
+    //m -> rowS 
+    //n -> colS 
+
+    if(rowS<=colS){
+        for(int j=0; j<rowS; j++){ // jth column 
+            for(int i=0; i<rowS; i++){ // ith row 
+                if (complex_norm(s_mxn[j*colS+j])< 10e-7){
+                    s_mxn[j*colS+j] = 10e-8; 
                 }
-                newU[i*m + j] = us[i*n+j] / s_mxn[j*n+j];    
+                newU[i*rowS + j] = us[i*colS+j] / s_mxn[j*colS+j];    
             }
         }
     }    
 
 }
 
-void get_v_from_vs_t(Complex* vs_t, Complex* s_mxn_t, Complex* newV, int n, int m){
+void get_v_from_vs_t(Complex* vs_t, Complex* s_mxn_t, Complex* newV, int rowSt, int colSt){
     
     // (v_t)(s_t) : nxm (uA == Sv --> (Sv)^t = (uA)^t) 
     // s_mxn_t : nxm  
     // newV_t : nxn 
 
-    if(m>n){
-        for(int j=0; j<n; j++){ //j th column 
-            for(int i=0; i<n; i++){ // ith row 
+    // m -> colSt
+    // n --> rowSt
 
-                if (complex_norm(s_mxn_t[j*m+j])< 10e-7){
-                    s_mxn_t[j*m+j] = 10e-8; 
+    if(colSt>rowSt){
+        for(int j=0; j<rowSt; j++){ //j th column 
+            for(int i=0; i<rowSt; i++){ // ith row 
+
+                if (complex_norm(s_mxn_t[j*colSt+j])< 10e-7){
+                    s_mxn_t[j*colSt+j] = 10e-8; 
                 }
-                newV[n*i + j] = vs_t[i*m+j] / s_mxn_t[j*m+j] ; 
+                newV[rowSt*i + j] = vs_t[i*colSt+j] / s_mxn_t[j*colSt+j] ; 
             }
         }
     }
