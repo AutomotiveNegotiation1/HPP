@@ -13,6 +13,7 @@ void print_matrix(double*A, int N){
         for(int j=0; j<N; j++){
             printf("%f " , A[i*N+j]); 
         }
+        
         printf("\n");
     }
     printf("\n");

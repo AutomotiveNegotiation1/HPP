@@ -1,14 +1,13 @@
-#include "jacobi_svd.h"
-#include "svd_test_data.h"
+#include "jacobi_cplx_svd.h"
 #include <stdbool.h>
 #include "jacobi_config.h"
 #include "svd_cplx_test_data.h"
 
-static double usv_t[m*n]; 
-static double v_t[n*n];
-static double tmp[m*n]; 
+static Complex usv_H[m*n]; 
+static Complex v_H[n*n];
+static Complex tmp[m*n]; 
 
-
+/*
 bool check_isIdentity(double* u, int t){
 
 
@@ -65,33 +64,6 @@ bool check_orthogonal_vec(int j1, int j2, double* u, int t){
 
 
 
-bool check_svd_result(double* A, double* u, double* v, double* s){
-    
-    //static double usv_t[m*n]; 
-    //static double v_t[n*n];
-    
-    transpose_mxn(v, v_t, n,n);
-    //static double tmp[m*n]; 
-    
-
-    matmul_mxn(u, s, tmp, m, m, m, n);
-    matmul_mxn(tmp, v_t, usv_t, m,n,n,n); 
-    
-    // check (u)(s)(v^t) == A 
-    for(int i=0; i<m; i++){ 
-        for(int j=0 ;j<n; j++){
-            if(fabs(usv_t[i*n+j] - A[i*n+j])>1e-7){
-                printf("error: %f i: %d j:%d\n", fabs(usv_t[i*n+j] - A[i*n+j]), i, j);
-                printf("usv_t[i*n_j]: %f\n", usv_t[i*n+j]);
-                printf("A[i*n_j]: %f\n", A[i*n+j]);
-                return false;
-            }
-        }
-    }
-   
-    return true; 
-
-}
 
 bool check_vector_orthogonal(double* u, int t, int val_col_num){
     // check (u)(u^t)= (u^t)(u) = I 
@@ -121,7 +93,7 @@ bool check_vector_orthogonal(double* u, int t, int val_col_num){
         matmul_mxn(u, u_t, uu_t, t,t,t,t);
         matmul_mxn(u_t, u, u_tu, t,t,t,t);
         
-        /*
+        
         printf("----check u or v \n");
         print_matrix(u, m);
 
@@ -129,7 +101,7 @@ bool check_vector_orthogonal(double* u, int t, int val_col_num){
         print_matrix(uu_t, m);
         printf("----check Identity utu or vvt\n");
         print_matrix(u_tu, m);
-        */
+        
         if(check_isIdentity(uu_t, t) && check_isIdentity(u_tu, t)){
             return true; 
         }
@@ -140,7 +112,6 @@ bool check_vector_orthogonal(double* u, int t, int val_col_num){
     }
     
 }
-
 
 bool check_vector_orthogonal_m(double* u, int val_col_num){
     // check (u)(u^t)= (u^t)(u) = I 
@@ -221,24 +192,59 @@ bool check_vector_orthogonal_n(double* v, int val_col_num){
     }
     
 }
+*/
 
-void test_data(double* A){
 
-    static double u[m*m];
-    static double v[n*n];
-    static double s[m*n];
+bool check_svd_result(Complex* A, Complex* u, Complex* v, Complex* s){
+    
+    //static double usv_t[m*n]; 
+    //static double v_t[n*n];
+    
+    hermitian_mxn(v, v_H, n,n);
+    
+
+    matmul_mxn(u, s, tmp, m, m, m, n);
+    matmul_mxn(tmp, v_H, usv_H, m,n,n,n); 
+    
+    std::cout << "-----Jacobi SVD result: usv_H-----" << std::endl;
+    print_mxn_matrix(usv_H, m,n);
+    
+    // check (u)(s)(v^t) == A 
+    for(int i=0; i<m; i++){ 
+        for(int j=0 ;j<n; j++){
+            if(fabs(usv_H[i*n+j] - A[i*n+j])>1e-7){
+                //printf("error: %f i: %d j:%d\n", fabs(usv_H[i*n+j] - A[i*n+j]), i, j);
+                //printf("usv_t[i*n_j]: %f\n", usv_H[i*n+j]);
+                //printf("A[i*n_j]: %f\n", A[i*n+j]);
+                return false;
+            }
+        }
+    }
+   
+    return true; 
+
+}
+void test_data(Complex* A){
+
+    static Complex u[m*m];
+    static Complex v[n*n];
+    static Complex s[m*n];
 
     //jacobi_svd(A, u, v, s, m, n);
     jacobi_svd(A, u, v, s, m, n);
     
-    printf("-----u ------\n");
+    std::cout << "-----u ------" << std::endl;
     print_matrix(u, m);
     
-    printf("-----v------\n");
+    std::cout << "-----v------" << std::endl;
     print_matrix(v, n);
     
+    if(check_svd_result(A, u, v, s)){
 
+        std::cout << "Test  was successfully completed." << std::endl;
+    };
     
+    /*
     if(check_svd_result(A, u, v, s)){
         int valid_col_num = check_zero_in_diag(s);
 
@@ -250,14 +256,14 @@ void test_data(double* A){
     else{
         printf("Test  had an error.\n");
     }
-    
+    */
 }
 
 
 
 int main(){
     //test_data(A); 
-    test_data(B); 
+    test_data(cA); 
     //test_data(C, 20, 10); 
     //test_data(D, 5, 5); 
     //test_data(E, 30, 30); 

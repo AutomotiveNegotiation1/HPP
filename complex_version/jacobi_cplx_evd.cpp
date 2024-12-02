@@ -12,12 +12,12 @@ double complex_norm(Complex z){
 void print_matrix(Complex*A, int N){
     for(int i=0; i<N; i++){
         for(int j=0; j<N; j++){
-            //printf("%f " , A[i*N+j]); 
+       
             std::cout<< A[i*N+j] << " ";
         }
-        printf("\n");
+        std::cout << std::endl; 
     }
-    printf("\n");
+    std::cout << std::endl;
 }
 
 void make_identity(Complex* u, int N){
@@ -59,51 +59,55 @@ void matmul(Complex* A, Complex*  B, Complex* C, int N){
     }
     
 }
-// Should Change to get theta in Complex version 
+
 void jacobi_rotate(Complex *A, Complex *U, int N, int k, int l){
     double t, c, s; 
+    Complex c_cplx;
+    Complex s_cplx; 
 
     Complex a_kk = A[k*N + k];
     Complex a_ll = A[l*N + l];
     Complex a_kl = A[k*N + l];
 
-    // Should Change to get theta in Complex version 
-    double theta = 0.5* atan2(2*a_kl, a_ll-a_kk); 
+    double phi = arg(a_kl); 
+    double theta = 0.5* atan2(2*complex_norm(a_kl), (a_ll-a_kk).real()); 
 
     t = tan(theta); 
     c = 1/(sqrt(1+t*t)); 
     s = c*t; 
 
+    c_cplx = Complex(c, 0.0);
+    s_cplx = s* Complex(cos(phi), sin(phi));
 
-    //update matrix A
-    // Should Change to get theta in Complex version 
+
     
     for(int h=0; h<N; h++){
-        double a_hk = A[N*h+k];
-        double a_hl = A[N*h+l];
+        Complex a_hk = A[N*h+k];
+        Complex a_hl = A[N*h+l];
 
-        A[N*h+k] = A[N*k+h] = c*a_hk - s*a_hl;
-        A[N*h+l] = A[N*l+h] = c*a_hl + s*a_hk; 
 
+        A[N*h+k] = c_cplx*a_hk - conj(s_cplx)*a_hl;
+        A[N*h+l] = s_cplx*a_hk + c_cplx*a_hl; 
+
+        A[N*k+h] = conj(A[N*h+k]); 
+        A[N*l+h] = conj(A[N*h+l]); 
     }
-    A[N*k+l] = A[N*l+k] = 0; 
+
+    A[N*k+l] = A[N*l+k] = Complex(0.0, 0.0);  
     
-    A[N*k+k] = c*c*a_kk + s*s*a_ll - 2*s*c*a_kl;
-    A[N*l+l] = s*s*a_kk + c*c*a_ll + 2*s*c*a_kl; 
+    //A[N*k+k] = c*c*a_kk + s*s*a_ll - 2*s*c*a_kl;
+    A[N*k+k] = c_cplx*c_cplx*a_kk + s_cplx*conj(s_cplx)*a_ll - 2*(s_cplx*c_cplx*conj(a_kl)).real();
+    A[N*l+l] = s_cplx*conj(s_cplx)*a_kk + c_cplx*c_cplx*a_ll + 2*(s_cplx*c_cplx*conj(a_kl)).real(); 
     
     //update U (sample)
-    double u_kk = U[k*N+k];
-    double u_kl = U[k*N+l];
-    double u_lk = U[l*N+k];
-    double u_ll = U[l*N+l]; 
-
+    
     for(int i=0; i<N; i++){
 
-        double u_ik = U[i*N + k];
-        double u_il = U[i*N + l];
+        Complex u_ik = U[i*N + k];
+        Complex u_il = U[i*N + l];
 
-        U[i*N+k]= c*u_ik - s*u_il; 
-        U[i*N+l]= s*u_ik + c*u_il;
+        U[i*N+k]= c_cplx*u_ik - conj(s_cplx)*u_il; 
+        U[i*N+l]= s_cplx*u_ik + c_cplx*u_il;
     }
 
 
@@ -118,7 +122,7 @@ void find_maxDiagOff(Complex* A, int N, int* p, int *q, double* value){
     for (int i=0; i<N; i++){
         for(int j=i+1; j<N; j++){
             
-            double tmp = A[i*N+j]; 
+            double tmp = complex_norm(A[i*N+j]); 
             
             if(tmp<0){
                 tmp = (-1)*tmp;
@@ -139,12 +143,8 @@ double cal_sumDiagOff(Complex *A, int N){
     double ret=0; 
     for(int i=0; i<N; i++){
         for(int j=i+1; j<N; j++){
-            if (A[i*N+j]<0.0){
-                ret += (-1)*A[i*N+j];
-            }
-            else{
-                ret += A[i*N+j];
-            }
+         
+           ret+= complex_norm(A[i*N+j]); 
         }
     }
     return ret; 
@@ -153,19 +153,6 @@ double cal_sumDiagOff(Complex *A, int N){
 // Should Change to get theta in Complex version 
 void jacobi_evd_m(Complex* A, int N, Complex* u, Complex* s){
     
-    //double *A_t, *AA_t; 
-    //A_t = (double*)malloc(sizeof(double)*N*N); 
-
-    static Complex A_t[m*m];      
-
-    //AA_t = (double*)malloc(sizeof(double)*N*N);
-    static Complex AA_t[m*m];
-
-    transpose(A, A_t, N);
-    matmul(A, A_t, AA_t, N); 
-
-    //double* diagoffSum = (double*)malloc(sizeof(double)); 
-    //double diagoffSum[1];
 
     int rot_num = 0 ; 
     while(cal_sumDiagOff(A, N)>1e-10){
@@ -199,22 +186,8 @@ void jacobi_evd_m(Complex* A, int N, Complex* u, Complex* s){
 }
 
 
-void jacobi_evd_n(double* A, int N, double* u, double* s){
+void jacobi_evd_n(Complex* A, int N, Complex* u, Complex* s){
     
-    //double *A_t, *AA_t; 
-    //A_t = (double*)malloc(sizeof(double)*N*N); 
-
-    static double A_t[n*n];      
-
-    //AA_t = (double*)malloc(sizeof(double)*N*N);
-    static double AA_t[n*n];
-
-    transpose(A, A_t, N);
-    matmul(A, A_t, AA_t, N); 
-
-    //double* diagoffSum = (double*)malloc(sizeof(double)); 
-    double diagoffSum[1];
-
     int rot_num = 0 ; 
     while(cal_sumDiagOff(A, N)>1e-10){
         
@@ -243,6 +216,5 @@ void jacobi_evd_n(double* A, int N, double* u, double* s){
     for(int i=0; i<N; i++){
         s[i*N+i] = A[i*N+i]; 
     }
-
 
 }
